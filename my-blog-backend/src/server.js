@@ -3,6 +3,18 @@ import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
 
 const app = express();
+const withDB = async (operations) => {
+  try {
+    const client = await MongoClient.connect("mongodb://localhost:27017", {
+      userNewUrlParser: true,
+    });
+    const db = client.db("my-blog");
+    await operations(db);
+    client.close();
+  } catch (error) {
+    res.status(500).json({ message: "Error connection to db!", error });
+  }
+};
 
 // Use the BODY PARSER to parse the JSON object in the REQUEST and add a BODY property to the REQUEST parameter
 app.use(bodyParser.json());
@@ -11,33 +23,21 @@ app.use(bodyParser.json());
 // Set a GET endpoint
 app.get("/api/articles/:name", async (req, res) => {
   const articleName = req.params.name;
-
-  try {
-    const client = await MongoClient.connect("mongodb://localhost:27017", {
-      userNewUrlParser: true,
-    });
-    const db = client.db("my-blog");
+  withDB(async (db) => {
     const articleInfo = await db
       .collection("articles")
       .findOne({ name: articleName });
 
     // Send JSON response
     res.status(200).json(articleInfo);
-    client.close();
-  } catch (error) {
-    res.status(500).json({ message: "Error connection to db!", error });
-  }
+  });
 });
 
 // Set a POST endpoint(use URL params)
 app.post("/api/articles/:name/upvote", async (req, res) => {
   const articleName = req.params.name;
 
-  try {
-    const client = await MongoClient.connect("mongodb://localhost:27017", {
-      userNewUrlParser: true,
-    });
-    const db = client.db("my-blog");
+  withDB(async (db) => {
     const articleInfo = await db
       .collection("articles")
       .findOne({ name: articleName });
@@ -57,10 +57,7 @@ app.post("/api/articles/:name/upvote", async (req, res) => {
 
     // Send JSON response
     res.status(200).json(updatedInfo);
-    client.close();
-  } catch (error) {
-    res.status(500).json({ message: "Error connection to db!", error });
-  }
+  });
 });
 
 // Set a POST endpoint(use body parser)
