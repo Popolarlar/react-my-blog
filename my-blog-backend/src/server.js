@@ -1,11 +1,15 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
+import path from "path";
 
 const app = express();
+
 // Use the BODY PARSER to parse the JSON object in the REQUEST and add a BODY property to the REQUEST parameter
 app.use(bodyParser.json());
 // After that, we can use req.body.var to access JSON
+
+app.use(express.static(path.join(__dirname, "/build")));
 
 // Before connecting to DB, make sure mongo db is up running
 // brew services start mongodb-community@4.2
@@ -95,6 +99,11 @@ app.post("/api/articles/:name/add-comment", async (req, res) => {
 
     res.status(200).json(updatedInfo);
   }, res);
+});
+
+// Redirect any other URL to the home page
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname + "/build/index.html"));
 });
 
 // Start the server
