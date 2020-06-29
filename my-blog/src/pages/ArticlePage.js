@@ -3,6 +3,7 @@ import articleContent from "./article-content";
 import ArticlesList from "../components/ArticlesList";
 import NotFoundPage from "./NotFoundPage";
 import CommentsList from "../components/CommentsList";
+import UpvotesSection from "../components/UpvotesSection";
 
 const ArticlePage = ({ match }) => {
   const name = match.params.name;
@@ -37,7 +38,13 @@ const ArticlePage = ({ match }) => {
   return (
     <React.Fragment>
       <h1>{article.title}</h1>
-      <p>This post has been upvoted {articleInfo.upvotes} times</p>
+
+      <UpvotesSection
+        articleName={name}
+        upvotes={articleInfo.upvotes}
+        setArticleInfo={SetArticleInfo}
+      />
+
       {article.content.map((paragraph, key) => (
         <p key={key}>{paragraph}</p>
       ))}
